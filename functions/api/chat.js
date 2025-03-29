@@ -18,8 +18,9 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
 
-    // TEMP: return full OpenAI response for debugging
-    return new Response(JSON.stringify({ fullResponse: data }), {
+    return new Response(JSON.stringify({
+      reply: data.choices[0].message.content
+    }), {
       headers: { "Content-Type": "application/json" }
     });
 
