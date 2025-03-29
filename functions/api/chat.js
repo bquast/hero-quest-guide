@@ -2,6 +2,7 @@ export async function onRequestPost(context) {
   try {
     const { message } = await context.request.json();
     const apiKey = context.env.OPENAI_API_KEY;
+    const systemPrompt = context.env.SYSTEM_PROMPT;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -11,7 +12,9 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: message }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message }],
         temperature: 0.7
       })
     });
