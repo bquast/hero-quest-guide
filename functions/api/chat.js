@@ -10,7 +10,7 @@ export async function onRequestPost(context) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4", // or "gpt-4-turbo" if you prefer
+        model: "gpt-4",
         messages: [{ role: "user", content: message }],
         temperature: 0.7
       })
@@ -18,7 +18,8 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
 
-    return new Response(JSON.stringify({ reply: data.choices[0].message.content }), {
+    // TEMP: return full OpenAI response for debugging
+    return new Response(JSON.stringify({ fullResponse: data }), {
       headers: { "Content-Type": "application/json" }
     });
 
