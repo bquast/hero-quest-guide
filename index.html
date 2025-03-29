@@ -36,6 +36,16 @@
       console.log('DEBUG:', data);
       chat.textContent += `\nBot: ${data.reply || '[Check console]'}`;
     };
+    window.onload = async () => {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message: "" }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await res.json();
+      chat.textContent += `\nBot: ${data.reply}`;
+    };
   </script>
 </body>
 </html>
