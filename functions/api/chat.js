@@ -18,7 +18,7 @@ export async function onRequestPost(context) {
       body: JSON.stringify({
         model: "gpt-4o",
         messages,
-        temperature: 0.7
+        temperature: 0.9
       })
     });
 
