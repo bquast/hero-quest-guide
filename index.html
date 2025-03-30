@@ -8,18 +8,42 @@
       max-width: 600px;
       margin: 2rem auto;
     }
+
     #chat {
-      white-space: pre-wrap;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
       border: 1px solid #ccc;
       padding: 1rem;
-      height: 300px;
+      height: 400px;
       overflow-y: scroll;
+      background: #fafafa;
     }
+
+    .bubble {
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      max-width: 80%;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background-color: #e0f7fa;
+    }
+
+    .bubble.bot {
+      align-self: flex-start;
+      background-color: #f1f1f1;
+    }
+
     #form {
       margin-top: 1rem;
       display: flex;
       gap: 0.5rem;
     }
+
     input {
       flex: 1;
     }
@@ -40,9 +64,17 @@
 
     const history = [];
 
+    function appendBubble(text, type) {
+      const div = document.createElement("div");
+      div.className = `bubble ${type}`;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
     async function sendAndRender(message) {
       if (message) {
-        chat.textContent += `\nYou: ${message}`;
+        appendBubble(message, "user");
         history.push({ role: "user", content: message });
       }
 
@@ -54,9 +86,7 @@
 
       const data = await res.json();
       const botReply = data.reply;
-      chat.textContent += `\nM: ${botReply}`;
-      chat.scrollTop = chat.scrollHeight;
-
+      appendBubble(botReply, "bot");
       history.push({ role: "assistant", content: botReply });
     }
 
@@ -69,7 +99,6 @@
       }
     };
 
-    // Start conversation automatically
     window.onload = () => sendAndRender("");
   </script>
 </body>
