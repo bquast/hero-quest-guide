@@ -3,22 +3,25 @@ export async function onRequestPost(context) {
     const { history } = await context.request.json();
     const apiKey = context.env.OPENAI_API_KEY;
     const systemPrompt = context.env.SYSTEM_PROMPT;
+    const model = context.env.MODEL;
+    const temperature = parseFloat(context.env.TEMPERATURE);
+    const url = context.env.URL;
 
     const messages = [
       { role: "system", content: systemPrompt },
       ...(history || [])
     ];
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model,
         messages,
-        temperature: 0.9
+        temperature
       })
     });
 
