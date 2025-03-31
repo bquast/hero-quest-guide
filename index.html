@@ -126,6 +126,8 @@
       const botReply = data.reply;
       appendBubble(botReply, "bot");
       history.push({ role: "assistant", content: botReply });
+
+      localStorage.setItem("hqg-history", JSON.stringify(history));
     }
 
     form.onsubmit = async (e) => {
@@ -137,7 +139,18 @@
       }
     };
 
-    window.onload = () => sendAndRender("");
+    window.onload = async () => {
+      const saved = localStorage.getItem("hqg-history");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        parsed.forEach(msg => {
+          appendBubble(msg.content, msg.role === "user" ? "user" : "bot");
+          history.push(msg);
+        });
+      } else {
+        await sendAndRender("");
+      }
+    };
   </script>
 </body>
 </html>
