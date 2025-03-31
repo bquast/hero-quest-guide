@@ -21,6 +21,9 @@
       flex-direction: column;
     }
     header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 1rem 2rem;
       background: white;
       border-bottom: 1px solid #e0e0e0;
@@ -77,10 +80,22 @@
       color: white;
       cursor: pointer;
     }
+    #email-button {
+      background: #007aff;
+      color: white;
+      font-size: 1rem;
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <header>Hero Quest Guide</header>
+  <header>
+    <div>Hero Quest Guide</div>
+    <button id="email-button">Email it to me</button>
+  </header>
   <div id="chat"></div>
   <form id="form">
     <input id="msg" autocomplete="off" placeholder="Type your message..." />
@@ -91,6 +106,7 @@
     const chat = document.getElementById('chat');
     const form = document.getElementById('form');
     const input = document.getElementById('msg');
+    const emailButton = document.getElementById('email-button');
 
     const history = [];
 
@@ -101,7 +117,6 @@
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
 
-      // Typewriter-style animation
       let i = 0;
       const interval = setInterval(() => {
         div.textContent += text.charAt(i);
@@ -149,6 +164,24 @@
         });
       } else {
         await sendAndRender("");
+      }
+    };
+
+    emailButton.onclick = () => {
+      const email = prompt("Enter your email address:");
+      if (email) {
+        fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, history })
+        })
+          .then(res => res.json())
+          .then(data => {
+            alert("Email sent successfully!");
+          })
+          .catch(() => {
+            alert("Something went wrong sending your email.");
+          });
       }
     };
   </script>
