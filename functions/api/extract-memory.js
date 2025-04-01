@@ -28,7 +28,9 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
     const json = data.choices[0].message.content.trim();
-    return new Response(json, {
+    const parsed = JSON.parse(json);
+
+    return new Response(JSON.stringify(parsed), {
       headers: { "Content-Type": "application/json" }
     });
   } catch (err) {

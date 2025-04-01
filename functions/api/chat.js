@@ -22,7 +22,6 @@ export async function onRequestPost(context) {
       ...(history || [])
     ];
 
-    // Request chat completion
     const chatRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -37,19 +36,29 @@ export async function onRequestPost(context) {
     });
 
     const chatData = await chatRes.json();
-    const reply = chatData.choices[0].message.content;
 
-    // Append assistant reply to history
+    if (!chatData.choices || !chatData.choices[0]?.message?.content) {
+      return new Response(JSON.stringify({ error: true, message: "OpenAI did not return a valid message." }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const reply = chatData.choices[0].message.content;
     const updatedHistory = [...(history || []), { role: "assistant", content: reply }];
 
-    // Extract updated memory
-    const extractRes = await fetch(new URL("/api/extract-memory", context.request.url).toString(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ history: updatedHistory })
-    });
+    let extractedMemory = memory;
+    try {
+      const extractRes = await fetch(new URL("/api/extract-memory", context.request.url).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: updatedHistory })
+      });
 
-    const extractedMemory = await extractRes.json();
+      extractedMemory = await extractRes.json();
+    } catch (err) {
+      console.error("Memory extraction failed:", err.message);
+    }
 
     return new Response(JSON.stringify({
       reply,
@@ -57,7 +66,6 @@ export async function onRequestPost(context) {
     }), {
       headers: { "Content-Type": "application/json" }
     });
-
   } catch (err) {
     return new Response(JSON.stringify({
       error: true,
