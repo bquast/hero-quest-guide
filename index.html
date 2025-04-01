@@ -109,6 +109,7 @@
     const emailButton = document.getElementById('email-button');
 
     const history = [];
+    let memory = {};
 
     function appendBubble(text, type) {
       const div = document.createElement("div");
@@ -116,6 +117,8 @@
       div.textContent = "";
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
+
+      if (!text) text = "⚠️ Something went wrong.";
 
       let i = 0;
       const interval = setInterval(() => {
@@ -131,18 +134,23 @@
         history.push({ role: "user", content: message });
       }
 
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history })
-      });
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ history, memory })
+        });
 
-      const data = await res.json();
-      const botReply = data.reply;
-      appendBubble(botReply, "bot");
-      history.push({ role: "assistant", content: botReply });
-
-      localStorage.setItem("hqg-history", JSON.stringify(history));
+        const data = await res.json();
+        const botReply = data.reply;
+        memory = data.memory || memory;
+        appendBubble(botReply, "bot");
+        history.push({ role: "assistant", content: botReply });
+        localStorage.setItem("hqg-history", JSON.stringify(history));
+        localStorage.setItem("hqg-memory", JSON.stringify(memory));
+      } catch (err) {
+        appendBubble("⚠️ Something went wrong. Please try again.", "bot");
+      }
     }
 
     form.onsubmit = async (e) => {
@@ -156,13 +164,18 @@
 
     window.onload = async () => {
       const saved = localStorage.getItem("hqg-history");
+      const savedMemory = localStorage.getItem("hqg-memory");
       if (saved) {
         const parsed = JSON.parse(saved);
         parsed.forEach(msg => {
           appendBubble(msg.content, msg.role === "user" ? "user" : "bot");
           history.push(msg);
         });
-      } else {
+      }
+      if (savedMemory) {
+        memory = JSON.parse(savedMemory);
+      }
+      if (!saved) {
         await sendAndRender("");
       }
     };
