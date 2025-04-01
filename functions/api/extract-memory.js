@@ -27,12 +27,17 @@ export async function onRequestPost(context) {
     });
 
     const data = await response.json();
-    const json = data.choices[0].message.content.trim();
-    const parsed = JSON.parse(json);
+    let raw = data.choices[0].message.content.trim();
+
+    // strip ```json or ``` if present
+    raw = raw.replace(/^```(?:json)?\\n?/, "").replace(/```$/, "");
+
+    const parsed = JSON.parse(raw);
 
     return new Response(JSON.stringify(parsed), {
       headers: { "Content-Type": "application/json" }
     });
+
   } catch (err) {
     return new Response(JSON.stringify({ error: true, message: err.message }), {
       status: 500,
