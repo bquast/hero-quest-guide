@@ -164,7 +164,7 @@
 
     window.onload = async () => {
       const saved = localStorage.getItem("hqg-history");
-      const savedMemory = localStorage.getItem("hqg-memory");
+      const savedMemory = localStorage.getItem("hqg-memory") || "{}";
       if (saved) {
         const parsed = JSON.parse(saved);
         parsed.forEach(msg => {
@@ -172,9 +172,7 @@
           history.push(msg);
         });
       }
-      if (savedMemory) {
-        memory = JSON.parse(savedMemory);
-      }
+      memory = JSON.parse(savedMemory);
       if (!saved) {
         await sendAndRender("");
       }
@@ -190,7 +188,11 @@
         })
           .then(res => res.json())
           .then(data => {
-            alert("Email sent successfully!");
+            if (data.error) {
+              alert("Email failed: " + data.message);
+            } else {
+              alert("Email sent successfully!");
+            }
           })
           .catch(() => {
             alert("Something went wrong sending your email.");
