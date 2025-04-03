@@ -60,6 +60,18 @@ export async function onRequestPost(context) {
       console.error("Memory extraction failed:", err.message);
     }
 
+    try {
+      const logKey = `chat-${Date.now()}`;
+      const logValue = JSON.stringify({
+        memory: extractedMemory,
+        history: updatedHistory,
+        timestamp: new Date().toISOString()
+      });
+      await context.env.CHAT_LOGS.put(logKey, logValue);
+    } catch (err) {
+      console.error("Failed to log session to KV:", err.message);
+    }
+
     return new Response(JSON.stringify({
       reply,
       memory: extractedMemory
